@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini Full Stack App</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <!-- LOGIN SECTION -->
+    <section class="hero" id="heroLogin">
+      <h1>Welcome back. Let's get you signed in.</h1>
+      <p>
+        Use your account to access your dashboard, check messages, and manage everything in one place.
+      </p>
+      <div class="pill-row">
+        <span class="pill">Fast access</span>
+        <span class="pill">Secure sessions</span>
+        <span class="pill">24/7 support</span>
+      </div>
+    </section>
+
+    <section class="card" id="cardLogin">
+      <h2>Login</h2>
+      <p>Please enter your details to continue.</p>
+
+      <div class="field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" placeholder="you@example.com" />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="********" />
+      </div>
+
+      <div class="row row-end">
+        <button type="button" class="text-link" id="forgot-btn">Forgot password?</button>
+      </div>
+
+      <button type="button" class="btn" onclick="login()">Login</button>
+      <p class="result" id="result"></p>
+
+      <div class="reset-panel" id="reset-panel" aria-hidden="true">
+        <h3>Reset your password</h3>
+        <p>Enter your email and we will send a reset link.</p>
+        <div class="field">
+          <label for="reset-email">Email address</label>
+          <input type="email" id="reset-email" placeholder="you@example.com" />
+        </div>
+        <button type="button" class="btn secondary" id="reset-submit">Send reset link</button>
+        <p class="result" id="reset-result"></p>
+        <a class="reset-link" id="reset-link" href="#" target="_blank" rel="noreferrer">Open reset page</a>
+      </div>
+
+      <div class="switch-block">
+        <p>Don't have an account? <a href="#" class="switch-link" id="switch-to-signup">Sign up</a></p>
+      </div>
+    </section>
+
+    <!-- SIGN UP SECTION -->
+    <section class="hero is-hidden" id="heroSignup">
+      <h1>Join us today</h1>
+      <p>
+        Create your account and start using our amazing features right away.
+      </p>
+      <div class="pill-row">
+        <span class="pill">Easy setup</span>
+        <span class="pill">Secure account</span>
+        <span class="pill">Instant access</span>
+      </div>
+    </section>
+
+    <section class="card is-hidden" id="cardSignup">
+      <h2>Sign Up</h2>
+      <p>Create your account to get started.</p>
+
+      <div class="field">
+        <label for="signupName">Full Name</label>
+        <input type="text" id="signupName" placeholder="John Doe" />
+      </div>
+
+      <div class="field">
+        <label for="signupEmail">Email address</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com" />
+      </div>
+
+      <div class="field">
+        <label for="signupPassword">Password</label>
+        <input type="password" id="signupPassword" placeholder="********" />
+      </div>
+
+      <div class="field">
+        <label for="signupConfirmPassword">Confirm Password</label>
+        <input type="password" id="signupConfirmPassword" placeholder="********" />
+      </div>
+
+      <button type="button" class="btn" onclick="signup()">Sign Up</button>
+      <p class="result" id="resultSignup"></p>
+
+      <div class="switch-block">
+        <p>Already have an account? <a href="#" class="switch-link" id="switch-to-login">Login</a></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

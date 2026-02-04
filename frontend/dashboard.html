@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="dashboard-page">
+    <section class="card dashboard-card">
+      <span class="badge">Dashboard</span>
+      <h1>Welcome</h1>
+      <p>You are signed in successfully.</p>
+      <div class="actions">
+        <button class="link-button" type="button" id="logout-btn">Logout</button>
+        <a class="link-button primary" href="#">Explore</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const isAuthed = sessionStorage.getItem("isLoggedIn") === "true";
+    if (!isAuthed) {
+      window.location.href = "index.html";
+    }
+
+    const logoutBtn = document.getElementById("logout-btn");
+    logoutBtn.addEventListener("click", () => {
+      sessionStorage.removeItem("isLoggedIn");
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>
