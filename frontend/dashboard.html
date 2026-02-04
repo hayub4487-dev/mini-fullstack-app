@@ -7,15 +7,111 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main class="dashboard-page">
-    <section class="card dashboard-card">
-      <span class="badge">Dashboard</span>
-      <h1>Welcome</h1>
-      <p>You are signed in successfully.</p>
+  <main class="dashboard-page dashboard-layout">
+    <section class="card dashboard-card profile-card">
+      <span class="badge">Profile</span>
+      <div class="profile-header">
+        <div class="avatar">HB</div>
+        <div class="profile-meta">
+          <h1>Hayub B.</h1>
+          <p>Salon lover • Faisalabad</p>
+        </div>
+      </div>
+      <div class="profile-info">
+        <div>
+          <p class="label">Email</p>
+          <p class="value">hayub4487@gmail.com</p>
+        </div>
+        <div>
+          <p class="label">Member Since</p>
+          <p class="value">Jan 2026</p>
+        </div>
+        <div>
+          <p class="label">City</p>
+          <p class="value">Faisalabad</p>
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div>
+          <p class="stat">12</p>
+          <p class="stat-label">Bookings</p>
+        </div>
+        <div>
+          <p class="stat">4</p>
+          <p class="stat-label">Favorites</p>
+        </div>
+        <div>
+          <p class="stat">3</p>
+          <p class="stat-label">Reviews</p>
+        </div>
+      </div>
       <div class="actions">
         <button class="link-button" type="button" id="logout-btn">Logout</button>
-        <a class="link-button primary" href="#">Explore</a>
+        <a class="link-button primary" href="#salon-list">Explore</a>
       </div>
+    </section>
+
+    <section class="card admin-card" id="admin-panel">
+      <div class="admin-header">
+        <div>
+          <p class="kicker">Admin Panel</p>
+          <h2>Add a Salon</h2>
+        </div>
+        <span class="chip">On-page form</span>
+      </div>
+      <form id="salon-form" class="salon-form">
+        <label class="form-field">
+          <span>Salon Name</span>
+          <input type="text" name="name" placeholder="e.g., Velvet Touch Studio" required />
+        </label>
+        <label class="form-field">
+          <span>Area / Neighborhood</span>
+          <input type="text" name="area" placeholder="e.g., D-Ground" required />
+        </label>
+        <label class="form-field">
+          <span>Rating (0-5)</span>
+          <input type="number" name="rating" min="0" max="5" step="0.1" placeholder="4.7" required />
+        </label>
+        <label class="form-field">
+          <span>Services (comma separated)</span>
+          <input type="text" name="services" placeholder="Haircut, Facial, Bridal" required />
+        </label>
+        <label class="form-field">
+          <span>Price Range</span>
+          <input type="text" name="price" placeholder="PKR 800 - 5,000" required />
+        </label>
+        <label class="form-field">
+          <span>Phone</span>
+          <input type="tel" name="phone" placeholder="+92 300 1234567" required />
+        </label>
+        <label class="form-field">
+          <span>Address</span>
+          <input type="text" name="address" placeholder="Main Boulevard, Faisalabad" required />
+        </label>
+        <label class="form-field">
+          <span>Opening Hours</span>
+          <input type="text" name="hours" placeholder="10:00 AM - 9:00 PM" required />
+        </label>
+        <label class="form-field full">
+          <span>Notes</span>
+          <textarea name="notes" rows="3" placeholder="Specialists, packages, etc."></textarea>
+        </label>
+        <div class="actions form-actions">
+          <button class="link-button secondary" type="reset">Clear</button>
+          <button class="link-button primary" type="submit">Add Salon</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="salon-section" id="salon-list">
+      <div class="salon-header">
+        <div>
+          <p class="kicker">Faisalabad Picks</p>
+          <h2>Top Salons Near You</h2>
+        </div>
+        <span class="chip">Dummy data</span>
+      </div>
+      <div class="salon-grid" id="salon-grid"></div>
     </section>
   </main>
 
@@ -29,6 +125,98 @@
     logoutBtn.addEventListener("click", () => {
       sessionStorage.removeItem("isLoggedIn");
       window.location.href = "index.html";
+    });
+
+    const API_BASE = "http://localhost:3000";
+    let salons = [];
+
+    const salonGrid = document.getElementById("salon-grid");
+    function renderSalons() {
+      salonGrid.innerHTML = salons
+        .map((salon) => `
+          <article class="salon-card">
+            <div class="salon-card__top">
+              <h3>${salon.name}</h3>
+              <span class="rating">⭐ ${salon.rating.toFixed(1)}</span>
+            </div>
+            <p class="salon-area">${salon.area}, Faisalabad</p>
+            <div class="salon-tags">
+              ${salon.services.map((service) => `<span>${service}</span>`).join("")}
+            </div>
+            <p class="salon-price">${salon.price}</p>
+            <div class="salon-meta">
+              <p>📍 ${salon.address}</p>
+              <p>📞 ${salon.phone}</p>
+              <p>⏰ ${salon.hours}</p>
+              ${salon.notes ? `<p>📝 ${salon.notes}</p>` : ""}
+            </div>
+          </article>
+        `)
+        .join("");
+    }
+
+    async function loadSalons() {
+      try {
+        const response = await fetch(`${API_BASE}/salons`);
+        const data = await response.json();
+        salons = Array.isArray(data.salons) ? data.salons : [];
+        renderSalons();
+      } catch (error) {
+        console.error("Failed to load salons", error);
+      }
+    }
+
+    loadSalons();
+
+    const salonForm = document.getElementById("salon-form");
+    salonForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(salonForm);
+      const ratingValue = Number(formData.get("rating"));
+      const services = String(formData.get("services") || "")
+        .split(",")
+        .map((service) => service.trim())
+        .filter(Boolean);
+
+      const payload = {
+        name: String(formData.get("name") || "").trim(),
+        area: String(formData.get("area") || "").trim(),
+        rating: Number.isFinite(ratingValue) ? ratingValue : 0,
+        services,
+        price: String(formData.get("price") || "").trim(),
+        phone: String(formData.get("phone") || "").trim(),
+        address: String(formData.get("address") || "").trim(),
+        hours: String(formData.get("hours") || "").trim(),
+        notes: String(formData.get("notes") || "").trim()
+      };
+
+      const tempSalon = { ...payload, _id: `temp-${Date.now()}` };
+      salons.unshift(tempSalon);
+      renderSalons();
+      salonForm.reset();
+      document.getElementById("salon-list").scrollIntoView({ behavior: "smooth" });
+
+      try {
+        const response = await fetch(`${API_BASE}/salons`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || "Unable to save salon");
+        }
+
+        if (data.salon) {
+          salons = salons.map((salon) => (salon._id === tempSalon._id ? data.salon : salon));
+          renderSalons();
+        }
+      } catch (error) {
+        console.error("Failed to save salon", error);
+        salons = salons.filter((salon) => salon._id !== tempSalon._id);
+        renderSalons();
+        alert("Failed to save salon. Please check the form and try again.");
+      }
     });
   </script>
 </body>

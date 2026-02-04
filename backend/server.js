@@ -77,6 +77,20 @@ resetTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 const User = mongoose.model("User", userSchema);
 const ResetToken = mongoose.model("ResetToken", resetTokenSchema);
 
+const salonSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  area: { type: String, required: true, trim: true },
+  rating: { type: Number, required: true, min: 0, max: 5 },
+  services: { type: [String], default: [] },
+  price: { type: String, required: true, trim: true },
+  phone: { type: String, required: true, trim: true },
+  address: { type: String, required: true, trim: true },
+  hours: { type: String, required: true, trim: true },
+  notes: { type: String, trim: true }
+}, { timestamps: true });
+
+const Salon = mongoose.model("Salon", salonSchema);
+
 async function ensureDefaultUser() {
   const email = "test@test.com";
   const existing = await User.findOne({ email });
@@ -90,6 +104,82 @@ async function ensureDefaultUser() {
     email,
     passwordHash
   });
+}
+
+async function ensureDefaultSalons() {
+  const count = await Salon.countDocuments();
+  if (count > 0) {
+    return;
+  }
+
+  await Salon.insertMany([
+    {
+      name: "Glam Avenue Salon",
+      area: "D-Ground",
+      rating: 4.8,
+      services: ["Bridal", "Hair Spa", "Makeup"],
+      price: "PKR 1,200 - 6,500",
+      phone: "+92 321 1112233",
+      address: "Main Boulevard, D-Ground",
+      hours: "11:00 AM - 10:00 PM",
+      notes: "Known for bridal packages"
+    },
+    {
+      name: "Velvet Touch Studio",
+      area: "Peoples Colony",
+      rating: 4.6,
+      services: ["Keratin", "Hair Color", "Facials"],
+      price: "PKR 900 - 5,000",
+      phone: "+92 300 4455667",
+      address: "Peoples Colony No. 1",
+      hours: "10:00 AM - 9:00 PM",
+      notes: "Signature hair treatments"
+    },
+    {
+      name: "Noor Beauty Lounge",
+      area: "Kohinoor City",
+      rating: 4.7,
+      services: ["Mehndi", "Makeup", "Threading"],
+      price: "PKR 700 - 4,800",
+      phone: "+92 333 9988776",
+      address: "Kohinoor City, Block A",
+      hours: "12:00 PM - 10:00 PM",
+      notes: "Party makeup specialists"
+    },
+    {
+      name: "The Shear Bar",
+      area: "Susan Road",
+      rating: 4.5,
+      services: ["Men's Grooming", "Beard", "Haircut"],
+      price: "PKR 600 - 2,500",
+      phone: "+92 341 2233445",
+      address: "Susan Road, Plaza 3",
+      hours: "10:00 AM - 8:30 PM",
+      notes: "Premium grooming for men"
+    },
+    {
+      name: "Rose & Blush Studio",
+      area: "Satiana Road",
+      rating: 4.4,
+      services: ["Manicure", "Pedicure", "Skin Care"],
+      price: "PKR 500 - 3,200",
+      phone: "+92 322 7654321",
+      address: "Satiana Road, Block C",
+      hours: "9:30 AM - 8:00 PM",
+      notes: "Relaxing spa treatments"
+    },
+    {
+      name: "Luxe Locks Salon",
+      area: "Canal Road",
+      rating: 4.9,
+      services: ["Balayage", "Hair Repair", "Styling"],
+      price: "PKR 1,500 - 7,000",
+      phone: "+92 345 8899001",
+      address: "Canal Road, Mall Area",
+      hours: "11:00 AM - 11:00 PM",
+      notes: "Luxury hair care"
+    }
+  ]);
 }
 
 async function sendResetEmail({ to, resetUrl }) {
@@ -309,10 +399,76 @@ app.post("/reset-password", async (req, res) => {
   }
 });
 
+app.get("/salons", async (_req, res) => {
+  try {
+    const salons = await Salon.find().sort({ createdAt: -1 });
+    res.json({ success: true, salons });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Unable to load salons" });
+  }
+});
+
+app.post("/salons", async (req, res) => {
+  try {
+    const {
+      name,
+      area,
+      rating,
+      services,
+      price,
+      phone,
+      address,
+      hours,
+      notes
+    } = req.body || {};
+
+    if (!name || !area || rating === undefined || !price || !phone || !address || !hours) {
+      res.status(400).json({
+        success: false,
+        message: "Missing required salon fields"
+      });
+      return;
+    }
+
+    const parsedRating = Number(rating);
+    if (!Number.isFinite(parsedRating) || parsedRating < 0 || parsedRating > 5) {
+      res.status(400).json({
+        success: false,
+        message: "Rating must be between 0 and 5"
+      });
+      return;
+    }
+
+    const salon = await Salon.create({
+      name: String(name).trim(),
+      area: String(area).trim(),
+      rating: parsedRating,
+      services: Array.isArray(services)
+        ? services.map((service) => String(service).trim()).filter(Boolean)
+        : String(services || "")
+            .split(",")
+            .map((service) => service.trim())
+            .filter(Boolean),
+      price: String(price).trim(),
+      phone: String(phone).trim(),
+      address: String(address).trim(),
+      hours: String(hours).trim(),
+      notes: notes ? String(notes).trim() : ""
+    });
+
+    res.status(201).json({ success: true, salon });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Unable to save salon" });
+  }
+});
+
 mongoose
   .connect(MONGODB_URI)
   .then(async () => {
     await ensureDefaultUser();
+    await ensureDefaultSalons();
     app.listen(3000, () => {
       console.log("Backend running on http://localhost:3000");
     });
